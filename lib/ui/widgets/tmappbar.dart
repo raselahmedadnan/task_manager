@@ -25,9 +25,12 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundImage: _shouldShowImage(AuthController.userModel?.photo) ?MemoryImage(
-                base64Decode(AuthController.userModel?.photo ?? ''),
-              ) : null,
+              backgroundImage:
+                  _shouldShowImage(AuthController.userModel?.photo)
+                      ? MemoryImage(
+                        base64Decode(AuthController.userModel?.photo ?? ''),
+                      )
+                      : null,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -57,7 +60,7 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  bool _shouldShowImage (String ? photo){
+  bool _shouldShowImage(String? photo) {
     return photo != null && photo.isNotEmpty;
   }
 

@@ -20,7 +20,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _mobileNumberTextEConroller = TextEditingController();
   final TextEditingController _passwordTextEConroller = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late  bool _passwordVisible = false;
   bool _registrationInProgress = false;
+
+
+
 
   String mobilePattern = r"^01[3-9]\d{8}$";
   @override
@@ -100,7 +104,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _passwordTextEConroller,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: InputDecoration(hintText: "Password"),
+                    obscureText: !_passwordVisible,
+                    decoration: InputDecoration(hintText: "Password",
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                        icon: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Theme.of(context).primaryColorDark,
+                        ),
+                      ),
+                    ),
+
                     validator: (String? value) {
                       if ((value?.trim().isEmpty ?? true) ||
                           value!.length < 6) {
@@ -108,6 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                       return null;
                     },
+
                   ),
                   SizedBox(height: 30),
                   Visibility(

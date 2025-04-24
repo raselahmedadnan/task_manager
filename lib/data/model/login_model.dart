@@ -7,7 +7,7 @@ class LoginModel{
 
   LoginModel.fromJson(Map<String,dynamic> jsonData){
     status = jsonData['status'] ?? '';
-    userModel = UserModel.formJson(jsonData['data'] ?? {});
+    userModel = UserModel.fromJson(jsonData['data'] ?? {});
     token = jsonData['token'] ?? '';
   }
 

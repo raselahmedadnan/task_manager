@@ -22,16 +22,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController _emailTextEConroller = TextEditingController();
   final TextEditingController _fastNameTextEConroller = TextEditingController();
   final TextEditingController _lastNameTextEConroller = TextEditingController();
-  final TextEditingController _mobileNumberTextEConroller = TextEditingController();
+  final TextEditingController _mobileNumberTextEConroller =
+      TextEditingController();
   final TextEditingController _passwordTextEConroller = TextEditingController();
- final GlobalKey<FormState> _fromKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _fromKey = GlobalKey<FormState>();
   final ImagePicker _imagePicker = ImagePicker();
-   XFile ? _pickedImage;
+  XFile? _pickedImage;
 
-   bool _updateProgressIndicator = false;
+  bool _updateProgressIndicator = false;
 
-
-   @override
+  @override
   void initState() {
     super.initState();
     UserModel userModel = AuthController.userModel!;
@@ -40,7 +40,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     _lastNameTextEConroller.text = userModel.lastName;
     _mobileNumberTextEConroller.text = userModel.mobile;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +83,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   controller: _lastNameTextEConroller,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(hintText: "Last Name"),
-                  validator: (String? value){
-                    if(value?.trim().isEmpty ?? true){
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
                       return 'Enter your last name';
                     }
                     return null;
@@ -105,12 +104,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   },
                 ),
                 TextFormField(
-                   controller: _passwordTextEConroller,
-                    decoration: InputDecoration(hintText: "Password")),
+                  controller: _passwordTextEConroller,
+                  decoration: InputDecoration(hintText: "Password"),
+                ),
                 SizedBox(height: 20),
                 Visibility(
                   visible: _updateProgressIndicator == false,
-                  replacement: Center(child: CircularProgressIndicator(),),
+                  replacement: Center(child: CircularProgressIndicator()),
                   child: ElevatedButton(
                     onPressed: _onTabSubmitButton,
                     child: Icon(
@@ -156,7 +156,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               ),
             ),
             SizedBox(width: 10),
-            Text(_pickedImage?.name ??"Select Image"),
+            Text(_pickedImage?.name ?? "Select Image"),
           ],
         ),
       ),
@@ -164,11 +164,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   }
 
   void _onTabSubmitButton() {
-     if(_fromKey.currentState!.validate()){
-        _profileUpdate();
-     }
-
+    if (_fromKey.currentState!.validate()) {
+      _profileUpdate();
+    }
   }
+
   Future<void> _profileUpdate() async {
     _updateProgressIndicator = true;
     setState(() {});
@@ -178,17 +178,15 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       "lastName": _lastNameTextEConroller.text.trim(),
       "mobile": _mobileNumberTextEConroller.text.trim(),
     };
-    if(_passwordTextEConroller.text.isNotEmpty){
-     requestBody ["password"] = _passwordTextEConroller.text;
-
-  }
+    if (_passwordTextEConroller.text.isNotEmpty) {
+      requestBody["password"] = _passwordTextEConroller.text;
+    }
 
     if (_pickedImage != null) {
       List<int> imageBytes = await _pickedImage!.readAsBytes();
       String encodedImage = base64Encode(imageBytes);
       requestBody['photo'] = encodedImage;
     }
-
 
     NetworkResponse response = await NetworkClient.postRequest(
       url: Urls.updateProfileUrl,
@@ -199,8 +197,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     if (response.isSuccess) {
       //ToDo: Update user data in cache
 
-
-
+     await AuthController.saveUserInformation(AuthController.token!, UserModel.fromJson(requestBody));
 
       _passwordTextEConroller.clear();
       showSnackBarMessage(context, "Profile Data Update Successfully!");
@@ -209,16 +206,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     }
   }
 
-
   Future<void> _onTabPhotoPicker() async {
-   XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
 
-   if(image != null){
-     _pickedImage = image;
-     setState(() {});
-
-
-   }
-
+    if (image != null) {
+      _pickedImage = image;
+      setState(() {});
+    }
   }
 }

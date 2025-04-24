@@ -35,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -47,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.emailAddress,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _emailTEController,
                   decoration: InputDecoration(hintText: "Email"),
                   validator: (String? value){
@@ -62,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordTEControoler,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   obscureText: !_passwordVisible,
                   decoration: InputDecoration(
                     hintText: "Password",
@@ -80,13 +79,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  validator: (String? value){
-                    if((value?.trim().isEmpty ?? false) || value!.length < 6){
-                      return "Enter password minimum length 6";
-                    }else{
-                      return null;
+                  validator: (String? value) {
+                    if ((value?.trim().isEmpty ?? true) ||
+                        value!.length < 6) {
+                      return 'Enter your password mor than 6 letters';
                     }
+                    return null;
                   },
+
                 ),
                 SizedBox(height: 20),
                 Visibility(
@@ -95,7 +95,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: CircularProgressIndicator(),
                   ),
                   child: ElevatedButton(
-                    onPressed: _onTabSignInButton,
+                    onPressed: (){
+                      if(_emailTEController.text.isEmpty || _passwordTEControoler.text.isEmpty ){
+                        showSnackBarMessage(context, "Please enter your Email & Password");
+                      }else{
+                        _onTabSignInButton();
+                      }
+                    },
                     child: Icon(
                       Icons.arrow_circle_right_outlined,
                       color: Colors.white,
@@ -149,6 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signIn() async {
+
     loginProgress = true;
     setState(() {});
     Map<String, dynamic> requestbody = {
@@ -165,7 +172,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if(response.isSuccess){
       LoginModel loginModel = LoginModel.fromJson(response.data!);
       AuthController.saveUserInformation(loginModel.token, loginModel.userModel);
-
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -197,4 +203,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordTEControoler.dispose();
     super.dispose();
   }
+
+
 }

@@ -17,6 +17,7 @@ class _AddScreenState extends State<AddScreen> {
   final TextEditingController _discriptionTEController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final currentDate = DateTime.now().toIso8601String();
 
   bool _addNewTaskProgress = false;
   @override
@@ -46,6 +47,7 @@ class _AddScreenState extends State<AddScreen> {
                   ),
                   SizedBox(height: 10),
                   TextFormField(
+                    controller: _titleTEController,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(hintText: "Subject"),
                     validator: (String? value) {
@@ -57,6 +59,7 @@ class _AddScreenState extends State<AddScreen> {
                   ),
                   SizedBox(height: 08),
                   TextFormField(
+                    controller: _discriptionTEController,
                     maxLines: 8,
                     decoration: InputDecoration(hintText: "Description"),
                     validator: (String? value) {
@@ -69,7 +72,7 @@ class _AddScreenState extends State<AddScreen> {
                   SizedBox(height: 30),
                   Visibility(
                     visible: _addNewTaskProgress == false,
-                    replacement: Center(child: CircularProgressIndicator(),),
+                    replacement: Center(child: CircularProgressIndicator()),
                     child: ElevatedButton(
                       onPressed: _onTabSubmitButton,
                       child: Icon(
@@ -100,6 +103,7 @@ class _AddScreenState extends State<AddScreen> {
       "title": _titleTEController.text.trim(),
       "description": _discriptionTEController.text.trim(),
       "status": "New",
+      "createdDate": currentDate,
     };
 
     final NetworkResponse response = await NetworkClient.postRequest(
@@ -109,22 +113,25 @@ class _AddScreenState extends State<AddScreen> {
     _addNewTaskProgress = false;
     setState(() {});
 
-    if(response.isSuccess){
+    if (response.isSuccess) {
       _clearTextField();
       showSnackBarMessage(context, 'Your new task add successfully');
-    }else{
+    } else {
       showSnackBarMessage(context, response.errorMessage);
     }
   }
-  void _clearTextField(){
+
+  void _clearTextField() {
     _titleTEController.clear();
     _discriptionTEController.clear();
   }
 
   @override
   void dispose() {
-   _titleTEController.dispose();
-   _discriptionTEController.dispose();
+    _titleTEController.dispose();
+    _discriptionTEController.dispose();
     super.dispose();
   }
+
+
 }

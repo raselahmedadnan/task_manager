@@ -49,6 +49,36 @@ class _ForgotPasswordPinVerificationScreenState
                     context,
                   ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
                 ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+
+                        children: [
+                          TextSpan(text: widget.email),
+                          TextSpan(
+                            text: "  Change Email",
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600 ,
+                            ),
+                            recognizer:
+                            TapGestureRecognizer()..onTap = (){
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
                 SizedBox(height: 20),
                 PinCodeTextField(
                   length: 6,
@@ -122,6 +152,7 @@ class _ForgotPasswordPinVerificationScreenState
     setState(() {});
 
     if (response.statusCode == 200) {
+
       showSnackBarMessage(context, "Otp Verify Successfully!");
       Navigator.push(
         context,
@@ -133,6 +164,9 @@ class _ForgotPasswordPinVerificationScreenState
               ),
         ),
       );
+
+
+
     } else {
       showSnackBarMessage(context, "Otp Verify fail");
     }
@@ -146,9 +180,9 @@ class _ForgotPasswordPinVerificationScreenState
     );
   }
 
-  @override
-  void dispose() {
-    _pinTEController.dispose();
-    super.dispose();
-  }
+void dkjf(){
+    TextButton(onPressed: (){}, child: Text("data"));
+}
+
+
 }

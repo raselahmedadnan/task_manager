@@ -8,6 +8,7 @@ class SammeryCard extends StatelessWidget {
   final String title;
   final int count;
 
+
   @override
   Widget build(BuildContext context) {
     return Card(

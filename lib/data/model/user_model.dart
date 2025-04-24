@@ -29,7 +29,7 @@ class UserModel{
 
 
   //Name Constructor
-  UserModel.formJson(Map<String,dynamic> jsonData){
+  UserModel.fromJson(Map<String,dynamic> jsonData){
     id = jsonData['_id'] ?? '';
     email = jsonData['email'] ?? '';
     firstName = jsonData['firstName'] ?? '';

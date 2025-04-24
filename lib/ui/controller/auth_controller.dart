@@ -18,7 +18,7 @@ static String _userDataKey = 'user-data';
   sharedPreferences.setString(_userDataKey, jsonEncode(user.toJson()));
 
   token = accessToken;
-  user = user;
+  userModel = user;
   }
 
   static Future<void> getUserInformation()async{
@@ -27,7 +27,7 @@ static String _userDataKey = 'user-data';
     String? saveUserModelString = sharedPreferences.getString(_userDataKey);
 
     if(saveUserModelString != null){
-      UserModel saveUserModel = UserModel.formJson(jsonDecode(saveUserModelString));
+      UserModel saveUserModel = UserModel.fromJson(jsonDecode(saveUserModelString));
       userModel = saveUserModel;
     }
     token = accessToken;

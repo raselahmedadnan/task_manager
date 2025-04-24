@@ -23,6 +23,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _conformPasswordTEController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late  bool _passwordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 TextFormField(
                   textInputAction: TextInputAction.next,
                   controller: _newPasswordTEController,
-                  decoration: InputDecoration(hintText: "New Password"),
+                  decoration: InputDecoration(hintText: "New Password",
+
+                  ),
                   validator: (String? value) {
                     if ((value?.trim().isEmpty ?? true) || value!.length < 6) {
                       return 'Enter your password mor than 6 letters';
@@ -62,9 +65,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 SizedBox(height: 20),
                 TextFormField(
-
+                  obscureText: !_passwordVisible,
                   controller: _conformPasswordTEController,
-                  decoration: InputDecoration(hintText: "Confirm Password"),
+                  decoration: InputDecoration(hintText: "Confirm Password",
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Theme.of(context).primaryColorDark,
+                      ),
+                    ),
+                  ),
                   validator: (String? value) {
                     if ((value?.trim().isEmpty ?? true) || value!.length < 6) {
                       return 'Enter your password mor than 6 letters';
@@ -125,7 +142,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         };
 
         NetworkResponse response = await NetworkClient.postRequest(
-            url: Urls.RecoverResetPassword,
+            url: Urls.recoverResetPassword,
             body: responseBody
         );
 
@@ -165,4 +182,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     _conformPasswordTEController.dispose();
     super.dispose();
   }
+
+  void clearTextController(){
+    _newPasswordTEController.clear();
+    _conformPasswordTEController.clear();
+  }
+
 }

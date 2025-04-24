@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:task_manager/data/service/network_client.dart';
@@ -47,9 +48,17 @@ class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
                 SizedBox(height: 20),
                 TextFormField(
                   textInputAction: TextInputAction.next,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.emailAddress,
                   controller: _emailTEController,
                   decoration: InputDecoration(hintText: "Email"),
+                  validator: (String? value) {
+                    String email = value?.trim() ?? '';
+                    if (EmailValidator.validate(email) == false) {
+                      return 'Enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height: 20),
                 Visibility(
@@ -115,7 +124,10 @@ class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
           builder: (context) => ForgotPasswordPinVerificationScreen(email: _emailTEController.text,),
         ),
       );
-    }else{
+    }else if(_emailTEController.text.isEmpty){
+      showSnackBarMessage(context, "Please enter your email first");
+    }
+    else{
       showSnackBarMessage(context, "Email Not Match. try difficult email");
     }
 
