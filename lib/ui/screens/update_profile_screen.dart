@@ -1,18 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:task_manager/data/model/user_model.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:task_manager/ui/controller/profile_update_controller.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/tmappbar.dart';
-
-import '../../data/service/network_client.dart';
-import '../../data/utils/urls.dart';
 import '../widgets/snack_bar_message.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
+
 
   @override
   State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
@@ -29,7 +27,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   XFile? _pickedImage;
 
-  bool _updateProgressIndicator = false;
+
+  ProfileUpdateController profileUpdateController =
+      Get.find<ProfileUpdateController>();
 
   @override
   void initState() {
@@ -108,16 +108,20 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   decoration: InputDecoration(hintText: "Password"),
                 ),
                 SizedBox(height: 20),
-                Visibility(
-                  visible: _updateProgressIndicator == false,
-                  replacement: Center(child: CircularProgressIndicator()),
-                  child: ElevatedButton(
-                    onPressed: _onTabSubmitButton,
-                    child: Icon(
-                      Icons.arrow_circle_right_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
+                GetBuilder<ProfileUpdateController>(
+                  builder: (controller) {
+                    return Visibility(
+                      visible: controller.updateProgressIndicator == false,
+                      replacement: Center(child: CircularProgressIndicator()),
+                      child: ElevatedButton(
+                        onPressed: _onTabSubmitButton,
+                        child: Icon(
+                          Icons.arrow_circle_right_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  }
                 ),
               ],
             ),
@@ -170,39 +174,20 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   }
 
   Future<void> _profileUpdate() async {
-    _updateProgressIndicator = true;
-    setState(() {});
-    Map<String, dynamic> requestBody = {
-      "email": _emailTextEConroller.text.trim(),
-      "firstName": _fastNameTextEConroller.text.trim(),
-      "lastName": _lastNameTextEConroller.text.trim(),
-      "mobile": _mobileNumberTextEConroller.text.trim(),
-    };
-    if (_passwordTextEConroller.text.isNotEmpty) {
-      requestBody["password"] = _passwordTextEConroller.text;
-    }
-
-    if (_pickedImage != null) {
-      List<int> imageBytes = await _pickedImage!.readAsBytes();
-      String encodedImage = base64Encode(imageBytes);
-      requestBody['photo'] = encodedImage;
-    }
-
-    NetworkResponse response = await NetworkClient.postRequest(
-      url: Urls.updateProfileUrl,
-      body: requestBody,
+    bool isSuccess = await profileUpdateController.profileUpdate(
+      _emailTextEConroller.text.trim(),
+      _fastNameTextEConroller.text.trim(),
+      _lastNameTextEConroller.text.trim(),
+      _mobileNumberTextEConroller.text.trim(),
+      _passwordTextEConroller.text,
+      _pickedImage
     );
-    _updateProgressIndicator = false;
-    setState(() {});
-    if (response.isSuccess) {
-      //ToDo: Update user data in cache
 
-     await AuthController.saveUserInformation(AuthController.token!, UserModel.fromJson(requestBody));
-
+    if (isSuccess) {
       _passwordTextEConroller.clear();
       showSnackBarMessage(context, "Profile Data Update Successfully!");
     } else {
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(context, profileUpdateController.errorMessage!, true);
     }
   }
 

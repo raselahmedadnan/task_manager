@@ -1,29 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager/ui/screens/add_screen.dart';
-import 'package:task_manager/ui/screens/forgot_password_pin_verification_screen.dart';
-import 'package:task_manager/ui/screens/forgot_password_verify_email.dart';
-import 'package:task_manager/ui/screens/login_screen.dart';
-import 'package:task_manager/ui/screens/main_bottom_nav_screen.dart';
-import 'package:task_manager/ui/screens/new_task_screen.dart';
-import 'package:task_manager/ui/screens/register_screen.dart';
-import 'package:task_manager/ui/screens/reset_password_screen.dart';
-import 'package:task_manager/ui/screens/update_profile_screen.dart';
-
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:task_manager/controller_binder.dart';
 import 'ui/screens/splash_screen.dart';
 
 class TaskManagerApp extends StatelessWidget {
   const TaskManagerApp({super.key});
 
-  static final GlobalKey<NavigatorState> navigaorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
 
 
 
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      navigatorKey: TaskManagerApp.navigaorKey,
+      navigatorKey: TaskManagerApp.navigatorKey,
+      initialBinding: ControllerBinder(),
       theme: ThemeData(
         textTheme: TextTheme(
           titleLarge: const TextStyle(

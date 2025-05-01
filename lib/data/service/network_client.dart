@@ -160,7 +160,7 @@ class NetworkClient {
  static Future<void> _movetoLoginScreen() async {
     await AuthController.clearUserData();
     Navigator.pushAndRemoveUntil(
-      TaskManagerApp.navigaorKey.currentContext!,
+      TaskManagerApp.navigatorKey.currentContext!,
       MaterialPageRoute(builder: (context) => LoginScreen()),
       (predicate) => false,
     );

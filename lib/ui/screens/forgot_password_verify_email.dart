@@ -1,10 +1,9 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/service/network_client.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controller/forgot_password_verify_email_controller.dart';
 import 'package:task_manager/ui/screens/forgot_password_pin_verification_screen.dart';
-import 'package:task_manager/ui/screens/register_screen.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
@@ -19,8 +18,8 @@ class ForgotPasswordVerifyEmail extends StatefulWidget {
 class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
   final TextEditingController _emailTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  ForgotPasswordVerifyEmailController forgotPasswordVerifyEmailController = Get.find<ForgotPasswordVerifyEmailController>();
 
-  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -61,16 +60,20 @@ class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
                   },
                 ),
                 SizedBox(height: 20),
-                Visibility(
-                  visible: isLoading == false,
-                  replacement: Center(child: CircularProgressIndicator(),),
-                  child: ElevatedButton(
-                    onPressed: _onTabOtpVerification,
-                    child: Icon(
-                      Icons.arrow_circle_right_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
+                GetBuilder<ForgotPasswordVerifyEmailController>(
+                  builder: (controller) {
+                    return Visibility(
+                      visible: controller.isLoading == false,
+                      replacement: Center(child: CircularProgressIndicator(),),
+                      child: ElevatedButton(
+                        onPressed: _onTabOtpVerification,
+                        child: Icon(
+                          Icons.arrow_circle_right_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  }
                 ),
                 SizedBox(height: 32),
                 Center(
@@ -106,24 +109,16 @@ class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
   }
 
   Future<void> _onTabOtpVerification() async {
-    isLoading = true;
-    setState(() {
-    });
-    NetworkResponse response = await NetworkClient.getRequest(
-      url: Urls.recoveryVerifyEmail(_emailTEController.text),
-    );
-    isLoading = false;
-    setState(() {
-    });
 
-    if(response.statusCode == 200){
+    bool isSuccess = await forgotPasswordVerifyEmailController.onTabOtpVerification(
+        _emailTEController.text.trim()
+    );
+    if(isSuccess){
       showSnackBarMessage(context, "Check your email we already send 6 digit code on your email");
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ForgotPasswordPinVerificationScreen(email: _emailTEController.text,),
-        ),
-      );
+
+      Get.to(ForgotPasswordPinVerificationScreen(email: _emailTEController.text));
+
+
     }else if(_emailTEController.text.isEmpty){
       showSnackBarMessage(context, "Please enter your email first");
     }
@@ -135,7 +130,7 @@ class _ForgotPasswordVerifyEmailState extends State<ForgotPasswordVerifyEmail> {
   }
 
   void _onTabSignIn() {
-    Navigator.pop(context);
+  Get.back();
   }
 
   @override

@@ -1,10 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/model/login_model.dart';
-import 'package:task_manager/data/service/network_client.dart';
-import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controller/login_controller.dart';
 import 'package:task_manager/ui/screens/forgot_password_verify_email.dart';
 import 'package:task_manager/ui/screens/main_bottom_nav_screen.dart';
 import 'package:task_manager/ui/screens/register_screen.dart';
@@ -22,8 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEControoler = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  bool loginProgress = false;
+  final LoginController _loginController = Get.find<LoginController>();
 
   late bool _passwordVisible = false;
 
@@ -50,11 +47,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   controller: _emailTEController,
                   decoration: InputDecoration(hintText: "Email"),
-                  validator: (String? value){
+                  validator: (String? value) {
                     String email = value?.trim() ?? '';
-                    if(EmailValidator.validate(email) == false){
+                    if (EmailValidator.validate(email) == false) {
                       return 'Enter a valid email';
-                    }else{
+                    } else {
                       return null;
                     }
                   },
@@ -80,33 +77,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   validator: (String? value) {
-                    if ((value?.trim().isEmpty ?? true) ||
-                        value!.length < 6) {
+                    if ((value?.trim().isEmpty ?? true) || value!.length < 6) {
                       return 'Enter your password mor than 6 letters';
                     }
                     return null;
                   },
-
                 ),
                 SizedBox(height: 20),
-                Visibility(
-                  visible: loginProgress == false,
-                  replacement: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: (){
-                      if(_emailTEController.text.isEmpty || _passwordTEControoler.text.isEmpty ){
-                        showSnackBarMessage(context, "Please enter your Email & Password");
-                      }else{
-                        _onTabSignInButton();
-                      }
-                    },
-                    child: Icon(
-                      Icons.arrow_circle_right_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
+                GetBuilder<LoginController>(
+                  builder: (controller) {
+                    return Visibility(
+                      visible: controller.loginProgress == false,
+                      replacement: Center(child: CircularProgressIndicator()),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_emailTEController.text.isEmpty ||
+                              _passwordTEControoler.text.isEmpty) {
+                            showSnackBarMessage(
+                              context,
+                              "Please enter your Email & Password",
+                            );
+                          } else {
+                            _onTabSignInButton();
+                          }
+                        },
+                        child: Icon(
+                          Icons.arrow_circle_right_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  }
                 ),
                 SizedBox(height: 32),
                 Center(
@@ -151,50 +152,35 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onTabSignInButton() {
-    _signIn();
+    if (_formKey.currentState!.validate()) {
+      _signIn();
+    }
+
   }
 
   Future<void> _signIn() async {
-
-    loginProgress = true;
-    setState(() {});
-    Map<String, dynamic> requestbody = {
-      "email": _emailTEController.text.trim(),
-      "password": _passwordTEControoler.text,
-    };
-    NetworkResponse response = await NetworkClient.postRequest(
-      url: Urls.longinUrl,
-    body: requestbody,
+    bool isSuccess = await _loginController.signIn(
+      _emailTEController.text.trim(),
+      _passwordTEControoler.text,
     );
-    loginProgress = false;
-    setState(() {});
 
-    if(response.isSuccess){
-      LoginModel loginModel = LoginModel.fromJson(response.data!);
-      AuthController.saveUserInformation(loginModel.token, loginModel.userModel);
+    if (isSuccess) {
+      Get.offAll(MainBottomNavScreen(), predicate: (pre) => false);
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => MainBottomNavScreen()),
-            (predicate) => false,
-      );
-    }else{
-      showSnackBarMessage(context, response.errorMessage);
+    } else {
+      showSnackBarMessage(context, _loginController.errorMessage!,true);
     }
   }
 
   void _onTapForgotPassword() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ForgotPasswordVerifyEmail()),
-    );
+
+    Get.to(ForgotPasswordVerifyEmail());
   }
 
   void _onTabSingUP() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => RegisterScreen()),
-    );
+
+    Get.to(RegisterScreen());
+
   }
 
   @override
@@ -203,6 +189,4 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordTEControoler.dispose();
     super.dispose();
   }
-
-
 }

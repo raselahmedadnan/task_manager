@@ -1,10 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:task_manager/data/service/network_client.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:task_manager/ui/controller/forgot_password_pin_verification_controller.dart';
 import 'package:task_manager/ui/screens/login_screen.dart';
-import 'package:task_manager/ui/screens/register_screen.dart';
 import 'package:task_manager/ui/screens/reset_password_screen.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
@@ -23,8 +22,10 @@ class _ForgotPasswordPinVerificationScreenState
     extends State<ForgotPasswordPinVerificationScreen> {
   final TextEditingController _pinTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ForgotPasswordPinVerificationController
+  forgotPasswordPinVerificationController =
+      Get.find<ForgotPasswordPinVerificationController>();
 
-  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +67,13 @@ class _ForgotPasswordPinVerificationScreenState
                             text: "  Change Email",
                             style: TextStyle(
                               color: Colors.green,
-                              fontWeight: FontWeight.w600 ,
+                              fontWeight: FontWeight.w600,
                             ),
                             recognizer:
-                            TapGestureRecognizer()..onTap = (){
-                              Navigator.pop(context);
-                            },
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.pop(context);
+                                  },
                           ),
                         ],
                       ),
@@ -101,13 +103,17 @@ class _ForgotPasswordPinVerificationScreenState
                   appContext: context,
                 ),
                 SizedBox(height: 20),
-                Visibility(
-                  visible: isLoading == false,
-                  replacement: Center(child: CircularProgressIndicator()),
-                  child: ElevatedButton(
-                    onPressed: _onTabSubmitButton,
-                    child: Text("Verify"),
-                  ),
+                GetBuilder<ForgotPasswordPinVerificationController>(
+                  builder: (controller) {
+                    return Visibility(
+                      visible: controller.isLoading == false,
+                      replacement: Center(child: CircularProgressIndicator()),
+                      child: ElevatedButton(
+                        onPressed: _onTabSubmitButton,
+                        child: Text("Verify"),
+                      ),
+                    );
+                  }
                 ),
                 SizedBox(height: 32),
                 Center(
@@ -143,29 +149,13 @@ class _ForgotPasswordPinVerificationScreenState
   }
 
   Future<void> _onTabSubmitButton() async {
-    isLoading = true;
-    setState(() {});
-    NetworkResponse response = await NetworkClient.getRequest(
-      url: Urls.recoveryVerifyOtp(widget.email, _pinTEController.text),
-    );
-    isLoading = false;
-    setState(() {});
+    bool isSuccess = await forgotPasswordPinVerificationController
+        .pinVerificationApi(widget.email, _pinTEController.text);
 
-    if (response.statusCode == 200) {
-
+    if (isSuccess) {
       showSnackBarMessage(context, "Otp Verify Successfully!");
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) => ResetPasswordScreen(
-                email: widget.email,
-                otp: _pinTEController.text,
-              ),
-        ),
-      );
 
-
+      Get.to(ResetPasswordScreen(email: widget.email, otp: _pinTEController.text));
 
     } else {
       showSnackBarMessage(context, "Otp Verify fail");
@@ -173,16 +163,8 @@ class _ForgotPasswordPinVerificationScreenState
   }
 
   void _onTabSignIn() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-      (pre) => false,
-    );
+
+    Get.offAll(LoginScreen(),predicate: (pre) => false);
   }
-
-void dkjf(){
-    TextButton(onPressed: (){}, child: Text("data"));
-}
-
 
 }

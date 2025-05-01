@@ -1,9 +1,9 @@
 import 'dart:convert';
-
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_manager/data/model/user_model.dart';
 
-class AuthController{
+class AuthController extends GetxController{
 static String? token;
 static UserModel? userModel;
 

@@ -1,8 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/service/network_client.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controller/register_user_controller.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
@@ -17,16 +17,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailTextEConroller = TextEditingController();
   final TextEditingController _fastNameTextEConroller = TextEditingController();
   final TextEditingController _lastNameTextEConroller = TextEditingController();
-  final TextEditingController _mobileNumberTextEConroller = TextEditingController();
+  final TextEditingController _mobileNumberTextEConroller =
+      TextEditingController();
   final TextEditingController _passwordTextEConroller = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late  bool _passwordVisible = false;
-  bool _registrationInProgress = false;
+  late bool _passwordVisible = false;
 
-
-
+  RegisterUserController registerUserController =
+      Get.find<RegisterUserController>();
 
   String mobilePattern = r"^01[3-9]\d{8}$";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,7 +106,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordTextEConroller,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     obscureText: !_passwordVisible,
-                    decoration: InputDecoration(hintText: "Password",
+                    decoration: InputDecoration(
+                      hintText: "Password",
                       suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
@@ -128,21 +130,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                       return null;
                     },
-
                   ),
                   SizedBox(height: 30),
-                  Visibility(
-                    visible: _registrationInProgress == false,
-                    replacement: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _onTabSubmitButton,
-                      child: Icon(
-                        Icons.arrow_circle_right_outlined,
-                        color: Colors.white,
-                      ),
-                    ),
+                  GetBuilder<RegisterUserController>(
+                    builder: (controller) {
+                      return Visibility(
+                        visible: controller.registrationInProgress == false,
+                        replacement: Center(child: CircularProgressIndicator()),
+                        child: ElevatedButton(
+                          onPressed: _onTabSubmitButton,
+                          child: Icon(
+                            Icons.arrow_circle_right_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    }
                   ),
                   SizedBox(height: 32),
                   Center(
@@ -185,28 +188,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _registerUser() async {
-    _registrationInProgress = true;
-    setState(() {});
-    Map<String, dynamic> requestBody = {
-      "email": _emailTextEConroller.text.trim(),
-      "firstName": _fastNameTextEConroller.text.trim(),
-      "lastName": _lastNameTextEConroller.text.trim(),
-      "mobile": _mobileNumberTextEConroller.text.trim(),
-      "password": _passwordTextEConroller.text,
-    };
-    NetworkResponse response = await NetworkClient.postRequest(
-      url: Urls.registrationUrl,
-      body: requestBody,
+    bool isSuccess = await registerUserController.registerUser(
+      _emailTextEConroller.text.trim(),
+      _fastNameTextEConroller.text.trim(),
+      _lastNameTextEConroller.text.trim(),
+      _mobileNumberTextEConroller.text.trim(),
+      _passwordTextEConroller.text,
     );
-    _registrationInProgress = false;
-    setState(() {});
-    if (response.isSuccess) {
+
+    if (isSuccess) {
       _clearTextFields();
       showSnackBarMessage(context, "User Register successfully");
     } else {
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(context, registerUserController.errorMessage!, true);
     }
   }
+
   void _clearTextFields() {
     _emailTextEConroller.clear();
     _fastNameTextEConroller.clear();
@@ -216,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onTabSingIn() {
-    Navigator.pop(context);
+    Get.back();
   }
 
   @override

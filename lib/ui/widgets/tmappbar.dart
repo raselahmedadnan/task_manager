@@ -1,13 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:task_manager/ui/controller/profile_update_controller.dart';
 import 'package:task_manager/ui/screens/login_screen.dart';
 import 'package:task_manager/ui/screens/update_profile_screen.dart';
 
 class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
   const TMAppBar({super.key, this.fromProfileScreen});
   final bool? fromProfileScreen;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,40 +25,44 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
           }
           _onTabUpdateProfileScreen(context);
         },
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage:
-                  _shouldShowImage(AuthController.userModel?.photo)
-                      ? MemoryImage(
-                        base64Decode(AuthController.userModel?.photo ?? ''),
-                      )
-                      : null,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AuthController.userModel?.fullName ?? 'unknown',
-                    style: textTheme.bodyLarge?.copyWith(color: Colors.white),
+        child: GetBuilder<ProfileUpdateController>(
+          builder: (controller) {
+            return Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage:
+                      _shouldShowImage(AuthController.userModel?.photo)
+                          ? MemoryImage(
+                            base64Decode(AuthController.userModel?.photo ?? ''),
+                          )
+                          : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AuthController.userModel?.fullName ?? 'unknown',
+                        style: textTheme.bodyLarge?.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        AuthController.userModel?.email ?? 'unknown',
+                        style: textTheme.bodySmall?.copyWith(color: Colors.white),
+                      ),
+                    ],
                   ),
-                  Text(
-                    AuthController.userModel?.email ?? 'unknown',
-                    style: textTheme.bodySmall?.copyWith(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                _onTabLogOut(context);
-              },
-              icon: Icon(Icons.logout_outlined),
-            ),
-          ],
+                ),
+                IconButton(
+                  onPressed: () {
+                    _onTabLogOut(context);
+                  },
+                  icon: Icon(Icons.logout_outlined),
+                ),
+              ],
+            );
+          }
         ),
       ),
     );

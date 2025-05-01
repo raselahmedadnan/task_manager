@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/service/network_client.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controller/reset_password_controller.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
@@ -24,6 +24,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late  bool _passwordVisible = false;
+
+  ResetPasswordController resetPasswordController = Get.find<ResetPasswordController>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,40 +131,27 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _onTabSetPassword() async {
-    if(_newPasswordTEController.text.isEmpty || _conformPasswordTEController.text.isEmpty){
 
-      return showSnackBarMessage(context, "Your password field is empty. Plz enter password");
+    bool isSuccess = await resetPasswordController.setPasswordApiPassData(
+        widget.email,
+        widget.otp,
+        _newPasswordTEController.text,
+        _conformPasswordTEController.text);
 
-    }else{
-
-      if(_newPasswordTEController.text == _conformPasswordTEController.text ){
-        Map<String,dynamic> responseBody = {
-          "email":widget.email,
-          "OTP": widget.otp,
-          "password":_conformPasswordTEController.text
-        };
-
-        NetworkResponse response = await NetworkClient.postRequest(
-            url: Urls.recoverResetPassword,
-            body: responseBody
-        );
-
-        if(response.isSuccess){
+        if(isSuccess){
           showSnackBarMessage(context, "Password Successfully changed. Plz Login again");
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (pre) => false,
-          );
+          // Navigator.pushAndRemoveUntil(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => const LoginScreen()),
+          //       (pre) => false,
+          // );
 
-        }
-
-
+          Get.offAll(LoginScreen(),predicate: (pre) => false);
 
       }else{
         showSnackBarMessage(context, "Password not match. Plz check your password");
       }
-    }
+
 
 
 
@@ -169,11 +159,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   void _onTabSignIn() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (pre) => false,
-    );
+    // Navigator.pushAndRemoveUntil(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => const LoginScreen()),
+    //   (pre) => false,
+    // );
+
+    Get.offAll(LoginScreen(),predicate: (pre) => false);
+
+
+
   }
 
   @override
